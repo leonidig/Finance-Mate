@@ -7,3 +7,14 @@ class UserData(BaseModel):
 
     telegram_id: Optional[int] = None
     name: str
+
+
+class CategoryData(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    title: str
+    user_id: int
+
+
+class GetAllCategories(BaseModel):
+    user_id: int

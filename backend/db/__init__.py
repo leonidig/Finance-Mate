@@ -3,8 +3,10 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column
 
 
-engine = create_async_engine("sqlite+aiosqlite:///users.db", echo=True)
-Session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=True)
+
+
+engine = create_async_engine("sqlite+aiosqlite:///mydb.db", echo=True)
+Session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 class Base(DeclarativeBase):
@@ -20,11 +22,10 @@ async def down():
         await conn.run_sync(Base.metadata.drop_all)
 
 async def migrate():
-    await down()
-    await up()
+    await down()  
+    await up()   
 
 
-from .models import User
-
+from .models import User, Category
 
 asyncio.run(migrate())
