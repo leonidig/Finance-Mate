@@ -8,7 +8,7 @@ class User(Base):
 
     telegram_id: Mapped[int]
     name: Mapped[str]
-    categories = relationship("Category", back_populates="user", lazy="immediate")
+    categories = relationship("Category", back_populates="user")
 
 
 class Category(Base):

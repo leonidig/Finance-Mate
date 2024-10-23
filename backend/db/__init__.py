@@ -3,7 +3,10 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
     # AsyncSession,
     async_sessionmaker,
+    AsyncAttrs,
 )
+
+# from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import (
     # sessionmaker,
     DeclarativeBase,
@@ -18,7 +21,7 @@ Session = async_sessionmaker(
 )  # sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
-class Base(DeclarativeBase):
+class Base(AsyncAttrs, DeclarativeBase):
     id: Mapped[int] = mapped_column(primary_key=True)
 
 

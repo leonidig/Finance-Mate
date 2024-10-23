@@ -13,8 +13,8 @@ class CategoryData(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     title: str
-    user_id: int
+    telegram_id: int
 
 
 class GetAllCategories(BaseModel):
-    user_id: int
+    telegram_id: int

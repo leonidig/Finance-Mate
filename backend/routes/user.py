@@ -20,7 +20,13 @@ async def create_user(data: UserData, session=Depends(get_session)):
 
 @app.post("/create_category", status_code=201)
 async def create_category(data: CategoryData, session=Depends(get_session)):
-    category = Category(**data.model_dump())
+    user = await session.scalar(
+        select(User).where(User.telegram_id == data.telegram_id)
+    )
+    if not user:
+        raise NotImplementedError()
+    category = Category(title=data.title, user=user)
+    # print(f"{data.model_dump()=}")
     session.add(category)
 
     return category
@@ -28,12 +34,13 @@ async def create_category(data: CategoryData, session=Depends(get_session)):
 
 @app.get("/get_all_categories")
 async def get_all(data: GetAllCategories, session=Depends(get_session)):
-    categories = await session.scalars(
-        select(Category)
-        .join(User, Category.user_id == User.telegram_id)
-        .where(User.telegram_id == data.user_id)
+    print(f"{data=}")
+    user = await session.scalar(
+        select(User).where(User.telegram_id == data.telegram_id)
     )
-    if categories:
+
+    if user:
+        categories = await user.awaitable_attrs.categories
         return [{"id": category.id, "title": category.title} for category in categories]
     else:
         raise HTTPException(status_code=404, detail="User not found")

@@ -43,7 +43,7 @@ async def command_start_handler(message: Message) -> None:
 @dp.message(F.text == "Add Category")
 async def add_category(message: Message):
     if message.text:
-        data = {"title": message.text, "user_id": message.from_user.id}
+        data = {"title": message.text, "telegram_id": message.from_user.id}
         print(data)
         print("*" * 80)
         async with ClientSession() as session:
@@ -56,7 +56,7 @@ async def add_category(message: Message):
 
 @dp.message(F.text == "Get All")
 async def get_all(message: Message):
-    data = {"user_id": message.from_user.id}
+    data = {"telegram_id": message.from_user.id}
     print(data)
     print("!" * 80)
     async with ClientSession() as session:
