@@ -8,12 +8,12 @@ class User(Base):
 
     telegram_id: Mapped[int]
     name: Mapped[str]
-    categories = relationship("Category", back_populates="user")
+    categories = relationship("Category", back_populates="user", lazy="immediate")
 
 
 class Category(Base):
     __tablename__ = "categories"
 
     title: Mapped[str]
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     user = relationship("User", back_populates="categories")
