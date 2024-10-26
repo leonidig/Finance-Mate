@@ -11,10 +11,3 @@ def main_menu_keyboard():
 
 
 
-def categories_keyboard(categories):
-    builder = ReplyKeyboardBuilder()
-    builder.button(text="To Main Keyboard")
-    for category in categories:
-        builder.button(text=category)
-    
-    return builder.as_markup()

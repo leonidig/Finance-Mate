@@ -5,11 +5,12 @@ from aiogram import (Bot,
                      Dispatcher,
                      F)
 from aiogram.filters import CommandStart
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiohttp import ClientSession
 
-from .keyboards.reply_keyboards import main_menu_keyboard, categories_keyboard
+from .keyboards.reply_keyboards import main_menu_keyboard
+from .keyboards.inline_keyboards import transaction_keyboard, categories_keyboard
 from .utils import Category
 
 
@@ -79,9 +80,12 @@ async def get_all(message: Message):
                 await message.answer(f"Here", reply_markup=keyboard)
 
 
-@dp.message(F.text == "To Main Keyboard")
-async def return_to_main_kb(message: Message):
-    await message.answer("Goodbye", reply_markup=main_menu_keyboard())
+@dp.callback_query(F.data.startswith("category_"))
+async def handle_category_selection(callback: CallbackQuery):
+    selected_category = callback.data.split("_", 1)[1]
+    await callback.answer()
+    await callback.message.answer(f"You selected the category: {selected_category}")
+    await callback.message.answer("What would you like to do?", reply_markup=transaction_keyboard())
 
 
 async def start() -> None:

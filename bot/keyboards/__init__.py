@@ -1,1 +1,2 @@
-from .reply_keyboards import main_menu_keyboard, categories_keyboard
+from .reply_keyboards import main_menu_keyboard
+from .inline_keyboards import transaction_keyboard, categories_keyboard
