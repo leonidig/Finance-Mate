@@ -26,7 +26,6 @@ async def create_category(data: CategoryData, session=Depends(get_session)):
     if not user:
         raise NotImplementedError()
     category = Category(title=data.title, user=user)
-    # print(f"{data.model_dump()=}")
     session.add(category)
 
     return category
