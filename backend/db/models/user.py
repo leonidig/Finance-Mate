@@ -16,6 +16,15 @@ class Category(Base):
 
     title: Mapped[str]
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    amount: Mapped[float]
     total: Mapped[float]
     user = relationship("User", back_populates="categories")
+    transactions = relationship("Transaction", back_populates="category")
+
+
+class Transaction(Base):
+    __tablename__ = "transactions"
+
+    telegram_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
+    amount: Mapped[float]
+    category = relationship("Category", back_populates="transactions")

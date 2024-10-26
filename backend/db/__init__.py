@@ -40,6 +40,6 @@ async def migrate():
     await up()
 
 
-from .models import User, Category
+from .models import User, Category, Transaction
 
 asyncio.run(migrate())

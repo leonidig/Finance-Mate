@@ -2,8 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, Depends
 from .. import app
-from ..db import Session, User, Category
-from ..schemas import UserData, CategoryData, GetAllCategories
+from ..db import Session, User, Category, Transaction
+from ..schemas import UserData, CategoryData, GetAllCategories, TransactionData
 
 
 async def get_session():
@@ -25,7 +25,7 @@ async def create_category(data: CategoryData, session=Depends(get_session)):
     )
     if not user:
         raise NotImplementedError()
-    category = Category(title=data.title, user=user, amount=data.amount, total=data.total)
+    category = Category(title=data.title, user=user, total=data.total)
     session.add(category)
 
     return category
@@ -33,7 +33,6 @@ async def create_category(data: CategoryData, session=Depends(get_session)):
 
 @app.get("/get_all_categories")
 async def get_all(data: GetAllCategories, session=Depends(get_session)):
-    print(f"{data=}")
     user = await session.scalar(
         select(User).where(User.telegram_id == data.telegram_id)
     )
@@ -43,3 +42,26 @@ async def get_all(data: GetAllCategories, session=Depends(get_session)):
         return [{"id": category.id, "title": category.title} for category in categories]
     else:
         raise HTTPException(status_code=404, detail="User not found")
+
+
+
+@app.post("/create_transaction", status_code=201)
+async def create_transaction(transaction_data: TransactionData, session=Depends(get_session)):
+    user = await session.scalar(select(User).where(User.telegram_id == transaction_data.telegram_id))
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    category = await session.scalar(select(Category).where(Category.title == transaction_data.category_title, Category.user_id == user.id))
+
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    transaction = Transaction(
+        telegram_id=transaction_data.telegram_id,
+        category_id=category.id,
+        amount=transaction_data.amount,
+    )
+    session.add(transaction)
+    category.total += transaction_data.amount  
+    session.add(category)
+
+    return transaction

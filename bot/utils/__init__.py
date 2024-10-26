@@ -1,1 +1,1 @@
-from .states import Category
+from .states import Category, Transaction

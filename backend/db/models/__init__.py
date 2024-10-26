@@ -1,1 +1,1 @@
-from .user import User, Category
+from .user import User, Category, Transaction
