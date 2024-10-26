@@ -13,6 +13,8 @@ class CategoryData(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     title: str
+    amount: float
+    total: float
     telegram_id: int
 
 
