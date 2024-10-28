@@ -6,6 +6,7 @@ def main_menu_keyboard():
 
     builder.button(text="Add Category")
     builder.button(text="Get All")
+    builder.button(text="Chart")
 
     return builder.as_markup()
 

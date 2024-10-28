@@ -2,8 +2,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, Depends
 from .. import app
-from ..db import Session, User, Category, Transaction
-from ..schemas import UserData, CategoryData, GetAllCategories, TransactionData
+from ..db import (Session,
+                  User,
+                  Category,
+                  Transaction)
+from ..schemas import (UserData,
+                       CategoryData,
+                       GetAllCategories, 
+                       TransactionData,
+                       CreateChart)
 
 
 async def get_session():
@@ -57,6 +64,7 @@ async def create_transaction(transaction_data: TransactionData, session=Depends(
     
     transaction = Transaction(
         telegram_id=transaction_data.telegram_id,
+        category_title=transaction_data.category_title,
         category_id=category.id,
         amount=transaction_data.amount,
     )
@@ -65,3 +73,10 @@ async def create_transaction(transaction_data: TransactionData, session=Depends(
     session.add(category)
 
     return transaction
+
+
+@app.get("/get_chart")
+async def create_chart(data: CreateChart, session=Depends(get_session)):
+    transactions = await session.scalars(select(Transaction).where(Transaction.telegram_id == data.telegram_id, Transaction.category_title == data.category_title).limit(2))
+    transactions = [{"amount": transaction.amount} for transaction in transactions]
+    return transactions

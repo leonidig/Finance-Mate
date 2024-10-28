@@ -1,5 +1,6 @@
 import asyncio
 from os import getenv
+import os
 
 from aiogram import (Bot,
                      Dispatcher,
@@ -10,8 +11,13 @@ from aiogram.fsm.context import FSMContext
 from aiohttp import ClientSession
 
 from .keyboards.reply_keyboards import main_menu_keyboard
-from .keyboards.inline_keyboards import transaction_keyboard, categories_keyboard
-from .utils import Category, Transaction
+from .keyboards.inline_keyboards import (transaction_keyboard,
+                                         categories_keyboard)
+from .utils import (Category, 
+                    Transaction,
+                    Chart
+                    )
+import matplotlib.pyplot as plt
 
 
 BOT_TOKEN = getenv("BOT_TOKEN")
@@ -118,6 +124,46 @@ async def enter_transaction(message: Message, state: FSMContext):
                         await message.answer(f"Error - {response.status}\nText - {await response.text()}")
         except ValueError:
             await message.reply("Please enter a valid amount.")
+    await state.clear()
+
+
+@dp.message(F.text == "Chart")
+async def chart_answer(message: Message, state: FSMContext):
+    await state.set_state(Chart.chart_name)
+    await message.answer("Enter Category Name: ")
+
+
+@dp.message(Chart.chart_name)
+async def send_chart(message: Message, state: FSMContext):
+    if message.text:
+        data = {
+            "telegram_id": message.from_user.id,
+            "category_title": message.text
+        }
+        async with ClientSession() as session:
+            async with session.get(f"{BACKEND_URL}/get_chart", json=data) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    amounts = amounts = ', '.join(str(t.get('amount')) for t in result)
+                    if amounts:  
+                        plt.figure(figsize=(10, 5))
+                        plt.plot(amounts, marker='o', linestyle='-', color='b')
+                        plt.title('Transaction Amounts')
+                        plt.xlabel('Transaction Index')
+                        plt.ylabel('Amount')
+                        plt.grid(True)
+
+                        graph_file = "chart.png"
+                        plt.savefig(graph_file)
+                        plt.close() 
+
+                        await message.answer_photo(photo=open(graph_file, 'rb'))
+
+
+                        os.remove(graph_file)
+
+                else: 
+                    await message.answer(f"Error - {response.status}\nText - {await response.text()}")
 
 
 async def start() -> None:

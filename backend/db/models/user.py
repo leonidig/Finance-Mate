@@ -26,5 +26,6 @@ class Transaction(Base):
 
     telegram_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
+    category_title: Mapped[str]
     amount: Mapped[float]
     category = relationship("Category", back_populates="transactions")

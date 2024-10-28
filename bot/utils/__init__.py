@@ -1,1 +1,3 @@
-from .states import Category, Transaction
+from .states import (Category,
+                     Transaction,
+                     Chart)

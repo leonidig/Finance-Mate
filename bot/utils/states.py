@@ -8,3 +8,7 @@ class Category(StatesGroup):
 
 class Transaction(StatesGroup):
     transaction_input = State()
+
+
+class Chart(StatesGroup):
+    chart_name = State()
