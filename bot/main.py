@@ -6,7 +6,7 @@ from aiogram import (Bot,
                      Dispatcher,
                      F)
 from aiogram.filters import CommandStart
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.fsm.context import FSMContext
 from aiohttp import ClientSession
 
@@ -133,6 +133,24 @@ async def chart_answer(message: Message, state: FSMContext):
     await message.answer("Enter Category Name: ")
 
 
+def create_expense_chart(data):
+    categories = list(data.keys())
+    values = list(data.values())
+
+    plt.figure(figsize=(6, 4))
+    plt.bar(categories, values, color='skyblue')
+    plt.xlabel('Categories')
+    plt.ylabel('Sum')
+    plt.title('All')
+    plt.tight_layout()
+
+    file_path = 'expense_chart.png'
+    plt.savefig(file_path)
+    plt.close()
+
+    return file_path
+
+
 @dp.message(Chart.chart_name)
 async def send_chart(message: Message, state: FSMContext):
     if message.text:
@@ -144,25 +162,23 @@ async def send_chart(message: Message, state: FSMContext):
             async with session.get(f"{BACKEND_URL}/get_chart", json=data) as response:
                 if response.status == 200:
                     result = await response.json()
-                    amounts = amounts = ', '.join(str(t.get('amount')) for t in result)
-                    if amounts:  
+                    amounts = [t.get('amount') for t in result]
+                    if amounts:
                         plt.figure(figsize=(10, 5))
-                        plt.plot(amounts, marker='o', linestyle='-', color='b')
+                        plt.bar(range(len(amounts)), amounts, color='b')
                         plt.title('Transaction Amounts')
                         plt.xlabel('Transaction Index')
                         plt.ylabel('Amount')
-                        plt.grid(True)
+                        plt.grid(True, axis='y')
 
                         graph_file = "chart.png"
                         plt.savefig(graph_file)
-                        plt.close() 
-
-                        await message.answer_photo(photo=open(graph_file, 'rb'))
-
+                        plt.close()
+                        chart = FSInputFile("chart.png")
+                        await message.answer_photo(chart)
 
                         os.remove(graph_file)
-
-                else: 
+                else:
                     await message.answer(f"Error - {response.status}\nText - {await response.text()}")
 
 

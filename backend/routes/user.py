@@ -77,6 +77,6 @@ async def create_transaction(transaction_data: TransactionData, session=Depends(
 
 @app.get("/get_chart")
 async def create_chart(data: CreateChart, session=Depends(get_session)):
-    transactions = await session.scalars(select(Transaction).where(Transaction.telegram_id == data.telegram_id, Transaction.category_title == data.category_title).limit(2))
+    transactions = await session.scalars(select(Transaction).where(Transaction.telegram_id == data.telegram_id, Transaction.category_title == data.category_title).limit(10))
     transactions = [{"amount": transaction.amount} for transaction in transactions]
     return transactions
