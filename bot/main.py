@@ -1,23 +1,27 @@
-import asyncio
-from os import getenv
+from os import (getenv,
+                remove)
 import os
+import asyncio
 
 from aiogram import (Bot,
                      Dispatcher,
                      F)
 from aiogram.filters import CommandStart
-from aiogram.types import Message, CallbackQuery, FSInputFile
+from aiogram.types import (Message,
+                           CallbackQuery,
+                           FSInputFile,
+                           InputFile)
 from aiogram.fsm.context import FSMContext
 from aiohttp import ClientSession
 
 from .keyboards.reply_keyboards import main_menu_keyboard
 from .keyboards.inline_keyboards import (transaction_keyboard,
                                          categories_keyboard)
-from .utils import (Category, 
+from .utils.states import (Category, 
                     Transaction,
                     Chart
                     )
-import matplotlib.pyplot as plt
+from .utils.charts import create_chart, create_chart_by_total
 
 
 BOT_TOKEN = getenv("BOT_TOKEN")
@@ -127,28 +131,10 @@ async def enter_transaction(message: Message, state: FSMContext):
     await state.clear()
 
 
-@dp.message(F.text == "Chart")
+@dp.message(F.text == "Category Chart")
 async def chart_answer(message: Message, state: FSMContext):
     await state.set_state(Chart.chart_name)
     await message.answer("Enter Category Name: ")
-
-
-def create_expense_chart(data):
-    categories = list(data.keys())
-    values = list(data.values())
-
-    plt.figure(figsize=(6, 4))
-    plt.bar(categories, values, color='skyblue')
-    plt.xlabel('Categories')
-    plt.ylabel('Sum')
-    plt.title('All')
-    plt.tight_layout()
-
-    file_path = 'expense_chart.png'
-    plt.savefig(file_path)
-    plt.close()
-
-    return file_path
 
 
 @dp.message(Chart.chart_name)
@@ -162,24 +148,39 @@ async def send_chart(message: Message, state: FSMContext):
             async with session.get(f"{BACKEND_URL}/get_chart", json=data) as response:
                 if response.status == 200:
                     result = await response.json()
-                    amounts = [t.get('amount') for t in result]
+                    amounts = [t.get('amount') for t in result if t.get('amount') is not None]
                     if amounts:
-                        plt.figure(figsize=(10, 5))
-                        plt.bar(range(len(amounts)), amounts, color='b')
-                        plt.title('Transaction Amounts')
-                        plt.xlabel('Transaction Index')
-                        plt.ylabel('Amount')
-                        plt.grid(True, axis='y')
+                        chart_file = create_chart(amounts)
+                        if chart_file:
+                            photo = FSInputFile("chart.png")
+                            await message.answer_photo(photo)
+                        remove(chart_file)
+    await state.clear()
 
-                        graph_file = "chart.png"
-                        plt.savefig(graph_file)
-                        plt.close()
-                        chart = FSInputFile("chart.png")
-                        await message.answer_photo(chart)
 
-                        os.remove(graph_file)
-                else:
-                    await message.answer(f"Error - {response.status}\nText - {await response.text()}")
+@dp.message(F.text == "Chart By Total")
+async def chart_by_total(message: Message):
+    await message.reply("CUM")
+    data = {
+        "telegram_id": message.from_user.id
+    }
+    async with ClientSession() as session:
+        async with session.get(f"{BACKEND_URL}/get_chart_by_total", json=data) as response:
+            if response.status == 200:
+                data = await response.json()
+                if data:
+                    chart_file = create_chart_by_total(data)
+                    if chart_file:
+                        try:
+                            photo = FSInputFile(chart_file) 
+                            await message.answer_photo(photo)
+                        except Exception as e:
+                            await message.reply(f"Error sending photo: {e}")
+                        finally:
+                            remove(chart_file)
+            else:
+                await message.reply(f"Code - {response.status}\nText - {await response.text()}")
+
 
 
 async def start() -> None:
