@@ -23,7 +23,6 @@ def create_chart(data) -> str:
         return graph_file
     except Exception as e:
         print(f"Error creating chart: {e}")
-<<<<<<< HEAD
         return None
     
 
@@ -46,6 +45,3 @@ def create_chart_by_total(data: list[dict]) -> str:
     plt.close()
     
     return graph_file
-=======
-        return None
->>>>>>> 01be670db25303917b43e4c0b24677c0e8b2d9c4

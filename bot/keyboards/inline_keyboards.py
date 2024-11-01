@@ -5,6 +5,7 @@ def transaction_keyboard():
     builder = InlineKeyboardBuilder()
     builder.button(text="Enter Transaction", callback_data="enter_transaction")
 
+
     return builder.as_markup()
 
 

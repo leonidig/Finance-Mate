@@ -7,13 +7,7 @@ def main_menu_keyboard():
     builder.button(text="Add Category")
     builder.button(text="Get All")
     builder.button(text="Category Chart")
-<<<<<<< HEAD
     builder.button(text="Chart By Total")
-=======
-    builder.button(text="Chart by total")
->>>>>>> 01be670db25303917b43e4c0b24677c0e8b2d9c4
+    builder.button(text="Delete Category")
 
     return builder.as_markup()
-
-
-

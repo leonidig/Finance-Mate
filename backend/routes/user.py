@@ -32,7 +32,7 @@ async def create_category(data: CategoryData, session=Depends(get_session)):
     )
     if not user:
         raise NotImplementedError()
-    category = Category(title=data.title, user=user, total=data.total)
+    category = Category(title=data.title, user=user, total=data.total, telegram_id=data.telegram_id)
     session.add(category)
 
     return category
@@ -87,3 +87,12 @@ async def get_chart_by_total(data: GetAllCategories, session=Depends(get_session
     categories = await session.scalars(select(Category).where(Category.user_id == user.id))
     totals = [{category.title : category.total} for category in categories]
     return totals
+
+
+@app.delete("/delete_category/{category_name}")
+async def delete_category(category_name, data: CreateChart, session=Depends(get_session)):
+    category = await session.scalar(select(Category).where(Category.title == data.category_title))
+    if category.telegram_id != data.telegram_id:
+        return "Permission Denied"
+    else:
+        await session.delete(category)
