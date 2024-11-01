@@ -51,7 +51,6 @@ async def get_all(data: GetAllCategories, session=Depends(get_session)):
         raise HTTPException(status_code=404, detail="User not found")
 
 
-
 @app.post("/create_transaction", status_code=201)
 async def create_transaction(transaction_data: TransactionData, session=Depends(get_session)):
     user = await session.scalar(select(User).where(User.telegram_id == transaction_data.telegram_id))
