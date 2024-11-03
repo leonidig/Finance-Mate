@@ -13,5 +13,6 @@ class Transaction(StatesGroup):
 class Chart(StatesGroup):
     chart_name = State()
 
+
 class CategoryToDelete(StatesGroup):
     category_to_delete = State()

@@ -11,4 +11,5 @@ def main_menu_keyboard():
     builder.button(text="Delete Category")
     builder.button(text="Total spent")
 
-    return builder.as_markup()
+    keyboard = builder.adjust(2)
+    return keyboard.as_markup()
