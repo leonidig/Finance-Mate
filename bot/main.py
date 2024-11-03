@@ -207,5 +207,20 @@ async def delete_category(message: Message, state: FSMContext):
     await state.clear()
 
 
+@dp.message(F.text == "Total spent")
+async def get_total_spent(message: Message):
+    data = {
+        "telegram_id": message.from_user.id
+    }
+
+    async with ClientSession() as session:
+        async with session.get(f"{BACKEND_URL}/total_spent", json=data) as response:
+            if response.ok:
+                await message.reply(f"Total spent ->\n{await response.json()}")
+            else:
+                print("*" * 80)
+                print(f"{response.json()}")
+
+
 async def start() -> None:
     await dp.start_polling(bot)

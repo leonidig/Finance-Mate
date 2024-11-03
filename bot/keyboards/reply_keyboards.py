@@ -9,5 +9,6 @@ def main_menu_keyboard():
     builder.button(text="Category Chart")
     builder.button(text="Chart By Total")
     builder.button(text="Delete Category")
+    builder.button(text="Total spent")
 
     return builder.as_markup()

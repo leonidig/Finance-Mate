@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from fastapi import HTTPException, Depends
 from .. import app
 from ..db import (Session,
@@ -96,3 +96,13 @@ async def delete_category(category_name, data: CreateChart, session=Depends(get_
         return "Permission Denied"
     else:
         await session.delete(category)
+
+
+@app.get("/total_spent")
+async def get_total_spent(data: GetAllCategories, session = Depends(get_session)):
+    total_spent = await session.scalar(
+        select(
+            func.sum(
+                Category.total))
+                .where(Category.telegram_id == data.telegram_id))
+    return total_spent
